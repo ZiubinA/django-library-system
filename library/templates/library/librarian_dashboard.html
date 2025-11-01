@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Librarian Dashboard</title>
+    <style>
+        body { font-family: sans-serif; margin: 20px; }
+        h1, h2 { color: #333; }
+        .container { display: flex; gap: 40px; }
+        .section { padding: 20px; border: 1px solid #ccc; border-radius: 8px; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f4f4f4; }
+        form { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        button { background-color: #007bff; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer; }
+        button:hover { background-color: #0056b3; }
+    </style>
+</head>
+<body>
+    <h1>Librarian Dashboard</h1>
+    <p>Welcome, {{ request.user.username }}! | <a href="/admin/logout/">Logout</a></p>
+
+    <div class="container">
+        <div class="section">
+            <h2>Check Out a Book</h2>
+            <form method="POST">
+                {% csrf_token %}
+                <label for="book_id">Available Book:</label>
+                <select name="book_id" id="book_id" required>
+                    {% for book in books %}
+                        <option value="{{ book.id }}">{{ book.title }} ({{ book.author }})</option>
+                    {% endfor %}
+                </select>
+
+                <label for="patron_username">Patron's Username:</label>
+                <input type="text" name="patron_username" id="patron_username" required>
+                
+                <button type="submit" name="checkout">Check Out</button>
+            </form>
+        </div>
+
+        <div class="section">
+            <h2>Active Loans (Check In)</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Book</th>
+                        <th>Patron</th>
+                        <th>Due Date</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for loan in loans %}
+                    <tr>
+                        <td>{{ loan.book.title }}</td>
+                        <td>{{ loan.patron.username }}</td>
+                        <td>{{ loan.due_date }}</td>
+                        <td>
+                            <form method="POST" style="display:inline;">
+                                {% csrf_token %}
+                                <input type="hidden" name="loan_id" value="{{ loan.id }}">
+                                <button type="submit" name="checkin">Check In</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4">No active loans.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>
