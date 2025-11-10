@@ -2,40 +2,54 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Books</title>
-    <style>
-        body { font-family: sans-serif; margin: 20px; }
-        h1 { color: #333; }
-        table { border-collapse: collapse; width: 50%; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background-color: #f4f4f4; }
-    </style>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body>
-    <h1>My Borrowed Books</h1>
-    <p>Welcome, {{ request.user.username }}! | <a href="/admin/logout/">Logout</a></p>
+<body class="bg-light">
+    <nav class="navbar navbar-dark bg-dark mb-4">
+        <div class="container">
+            <span class="navbar-brand mb-0 h1">My Library Books</span>
+            <span class="navbar-text text-white">
+                {{ user.username }} | 
+                <form action="{% url 'logout' %}" method="post" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-link text-white p-0" style="text-decoration: underline; vertical-align: baseline;">Logout</button>
+                </form>
+            </span>
+        </div>
+    </nav>
 
-    <table>
-        <thead>
-            <tr>
-                <th>Book Title</th>
-                <th>Author</th>
-                <th>Due Date</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for loan in loans %}
-            <tr>
-                <td>{{ loan.book.title }}</td>
-                <td>{{ loan.book.author }}</td>
-                <td>{{ loan.due_date }}</td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="3">You have no books checked out.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div class="container">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Books You Have Checked Out</h4>
+            </div>
+            <div class="card-body">
+                {% if loans %}
+                    <div class="list-group">
+                        {% for loan in loans %}
+                            <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5 class="mb-1">
+                                        <a href="{% url 'book_detail' loan.book.id %}" class="text-decoration-none">
+                                            {{ loan.book.title }}
+                                        </a>
+                                    </h5>
+                                    <p class="mb-1 text-muted">by {{ loan.book.author }}</p>
+                                </div>
+                                <div class="text-end">
+                                    <small>Due Date:</small><br>
+                                    <strong>{{ loan.due_date|date:"M d, Y" }}</strong>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted text-center my-4">You don't have any books checked out right now.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
 </body>
 </html>
